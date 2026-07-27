@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bleach - Tracker d'Épisodes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bleach: {
+                            accent: '#3b82f6',
+                            dark: '#0a0a0a',
+                            gray: '#161616',
+                            card: '#1f1f1f',
+                            light: '#f1f1f1'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0a0a0a; color: #f1f1f1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .episode-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .episode-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.25); }
+        .checkbox-custom { accent-color: #3b82f6; width: 1.5rem; height: 1.5rem; cursor: pointer; }
+        .progress-bar-inner { transition: width 0.5s ease-in-out; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+    </style>
+</head>
+<body class="min-h-screen bg-bleach-dark">
+
+    <header class="bg-bleach-gray border-b border-gray-800 sticky top-0 z-50 shadow-xl shadow-black">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-black text-white uppercase tracking-wider">Bleach <span class="text-gray-400 font-light">Tracker</span></h1>
+            </div>
+            <div class="w-full md:w-1/3 relative">
+                <input type="text" id="searchInput" placeholder="Chercher par numéro (ex: 15)..." class="w-full bg-bleach-dark border border-gray-800 rounded-full py-2 px-4 pl-10 text-white focus:outline-none focus:border-bleach-accent focus:ring-1 focus:ring-bleach-accent transition">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <section class="bg-bleach-gray rounded-xl p-6 mb-8 border border-gray-800 shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-white"><i class="fa-solid fa-chart-pie text-bleach-accent"></i> Ma Progression</h2>
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between mb-1 text-sm font-medium">
+                        <span class="text-gray-300">Progression Globale</span>
+                        <span id="globalProgressText" class="text-white font-semibold">0% (0/366)</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-3 border border-gray-800">
+                        <div id="globalProgressBar" class="bg-white h-3 rounded-full progress-bar-inner shadow-[0_0_8px_rgba(255,255,255,0.3)]" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1 text-sm font-medium">
+                        <span class="text-gray-300">Progression Histoire Principale (Canon + Semi-filler)</span>
+                        <span id="canonProgressText" class="text-bleach-accent font-semibold">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-3 border border-gray-800 shadow-inner">
+                        <div id="canonProgressBar" class="bg-green-600 h-3 rounded-full progress-bar-inner shadow-[0_0_10px_rgba(22,163,74,0.5)]" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-between items-center flex-wrap gap-4">
+                <button id="exportBtn" class="text-sm bg-bleach-accent hover:bg-blue-600 text-white px-4 py-2 rounded transition flex items-center gap-2 font-bold shadow-lg shadow-blue-950">
+                    <i class="fa-solid fa-download"></i> Exporter mes épisodes vus (JSON)
+                </button>
+                <button id="resetBtn" class="text-sm text-gray-400 hover:text-red-500 transition flex items-center gap-2 font-medium">
+                    <i class="fa-solid fa-trash-can"></i> Réinitialiser ma progression
+                </button>
+            </div>
+        </section>
+
+        <section class="mb-8 flex flex-wrap gap-3 justify-center md:justify-start" id="filters">
+            <button data-filter="all" class="filter-btn active px-5 py-2 rounded-full bg-bleach-accent text-white font-bold transition hover:bg-blue-600 shadow-lg shadow-blue-950 text-sm">Tous</button>
+            <button data-filter="canon" class="filter-btn px-5 py-2 rounded-full bg-bleach-gray text-gray-300 font-semibold transition hover:bg-gray-800 border border-gray-800 text-sm">Canon</button>
+            <button data-filter="semifiller" class="filter-btn px-5 py-2 rounded-full bg-bleach-gray text-gray-300 font-semibold transition hover:bg-gray-800 border border-gray-800 text-sm">Semi-filler</button>
+            <button data-filter="filler" class="filter-btn px-5 py-2 rounded-full bg-bleach-gray text-gray-300 font-semibold transition hover:bg-gray-800 border border-gray-800 text-sm">Hors-série</button>
+        </section>
+
+        <div id="episodesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </main>
+
+    <footer class="bg-bleach-gray border-t border-gray-800 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>Bleach Tracker &copy; 2026 - Liens BetaSeries officiels.</p>
+        </div>
+    </footer>
+
+    <script>
+        function range(start, end) {
+            return Array(end - start + 1).fill().map((_, idx) => start + idx);
+        }
+
+        const fillers = [33, 50, ...range(64, 108), ...range(128, 137), ...range(147, 149), ...range(168, 189), 204, 205, 213, 214, ...range(227, 265), 287, 298, 299, ...range(303, 305), ...range(311, 341), 355];
+        const semiFillers = [8, 27, 32, 46, 109, 111, 116, 119, 141, 143, 146, 156, 160, 161, 190, 193, 206, 269, 342, 343];
+
+        function getSeasonInfo(epNum) {
+            if (epNum <= 20) return { s: 1, e: epNum };
+            if (epNum <= 41) return { s: 2, e: epNum - 20 };
+            if (epNum <= 63) return { s: 3, e: epNum - 41 };
+            if (epNum <= 91) return { s: 4, e: epNum - 63 };
+            if (epNum <= 109) return { s: 5, e: epNum - 91 };
+            if (epNum <= 131) return { s: 6, e: epNum - 109 };
+            if (epNum <= 151) return { s: 7, e: epNum - 131 };
+            if (epNum <= 167) return { s: 8, e: epNum - 151 };
+            if (epNum <= 190) return { s: 9, e: epNum - 167 };
+            if (epNum <= 205) return { s: 10, e: epNum - 190 };
+            if (epNum <= 212) return { s: 11, e: epNum - 205 };
+            if (epNum <= 229) return { s: 12, e: epNum - 212 };
+            if (epNum <= 265) return { s: 13, e: epNum - 229 };
+            if (epNum <= 316) return { s: 14, e: epNum - 265 };
+            if (epNum <= 342) return { s: 15, e: epNum - 316 };
+            return { s: 16, e: epNum - 342 };
+        }
+
+        const episodes = [];
+        const totalEpisodes = 366;
+        let totalMainStream = 0;
+
+        for (let i = 1; i <= totalEpisodes; i++) {
+            let type = "Canon";
+            let cat = "canon";
+            if (fillers.includes(i)) { type = "Hors-série"; cat = "filler"; }
+            else if (semiFillers.includes(i)) { type = "Semi-filler"; cat = "semifiller"; }
+            
+            if (cat === "canon" || cat === "semifiller") totalMainStream++;
+
+            const si = getSeasonInfo(i);
+            const sStr = String(si.s).padStart(2, '0');
+            const eStr = String(si.e).padStart(2, '0');
+            const betaUrl = `https://www.betaseries.com/episode/bleachjp/s${sStr}e${eStr}`;
+
+            episodes.push({
+                id: i,
+                title: `Épisode ${i}`,
+                type: type,
+                category: cat,
+                season: si.s,
+                epInSeason: si.e,
+                betaUrl: betaUrl
+            });
+        }
+
+        let watched = JSON.parse(localStorage.getItem('bleachWatched')) || {};
+        let currentFilter = 'all';
+        let searchQuery = '';
+
+        const grid = document.getElementById('episodesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const resetBtn = document.getElementById('resetBtn');
+        const exportBtn = document.getElementById('exportBtn');
+
+        function saveState() {
+            localStorage.setItem('bleachWatched', JSON.stringify(watched));
+            updateProgress();
+        }
+
+        function toggleWatched(id, isChecked) {
+            if (isChecked) watched[id] = true;
+            else delete watched[id];
+            saveState();
+            
+            const card = document.getElementById(`card-${id}`);
+            if (card) {
+                if (isChecked) {
+                    card.classList.add('opacity-50', 'grayscale');
+                    card.classList.remove('border-gray-800');
+                    card.classList.add('border-bleach-accent/50');
+                } else {
+                    card.classList.remove('opacity-50', 'grayscale', 'border-bleach-accent/50');
+                    card.classList.add('border-gray-800');
+                }
+            }
+        }
+
+        function updateProgress() {
+            const watchedIds = Object.keys(watched).map(Number);
+            const watchedTotal = watchedIds.length;
+            const watchedMain = watchedIds.filter(id => {
+                const ep = episodes.find(e => e.id === id);
+                return ep && (ep.category === 'canon' || ep.category === 'semifiller');
+            }).length;
+
+            const globalPct = Math.round((watchedTotal / totalEpisodes) * 100) || 0;
+            const mainPct = Math.round((watchedMain / totalMainStream) * 100) || 0;
+
+            document.getElementById('globalProgressText').textContent = `${globalPct}% (${watchedTotal}/${totalEpisodes})`;
+            document.getElementById('globalProgressBar').style.width = `${globalPct}%`;
+
+            document.getElementById('canonProgressText').textContent = `${mainPct}% (${watchedMain}/${totalMainStream})`;
+            document.getElementById('canonProgressBar').style.width = `${mainPct}%`;
+        }
+
+        function renderEpisodes() {
+            const filtered = episodes.filter(ep => {
+                const matchFilter = currentFilter === 'all' || ep.category === currentFilter;
+                const matchSearch = ep.id.toString().includes(searchQuery) || ep.type.toLowerCase().includes(searchQuery);
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 text-lg">Aucun épisode trouvé.</div>`;
+                return;
+            }
+
+            const html = filtered.map(ep => {
+                const isWatched = !!watched[ep.id];
+                
+                // Couleurs demandées : Canon = Vert, Hors-série = Rouge, Semi-filler = Jaune
+                let badgeColor = 'bg-green-600 text-white';
+                if (ep.category === 'filler') {
+                    badgeColor = 'bg-red-600 text-white';
+                } else if (ep.category === 'semifiller') {
+                    badgeColor = 'bg-yellow-500 text-slate-950 font-bold';
+                }
+
+                const opacityClass = isWatched ? 'opacity-50 grayscale border-bleach-accent/50' : 'border-gray-800';
+
+                return `
+                    <div id="card-${ep.id}" class="episode-card bg-[#161616] rounded-xl overflow-hidden border ${opacityClass} flex flex-col relative shadow-md">
+                        <div class="relative bg-gradient-to-tr from-black via-neutral-900 to-black h-36 flex items-center justify-center border-b border-gray-800/80 overflow-hidden">
+                            <img src="https://static.vecteezy.com/system/resources/previews/028/574/845/non_2x/bleach-anime-logo-free-vector.jpg" alt="Bleach Logo" class="absolute inset-0 w-full h-full object-contain p-4 opacity-25 filter drop-shadow">
+                            <div class="absolute inset-0 bg-black/50"></div>
+                            <div class="text-center z-10 px-2">
+                                <span class="text-white font-black text-3xl tracking-widest drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">#${ep.id}</span>
+                                <p class="text-[11px] text-gray-400 mt-1 uppercase tracking-wider font-semibold">Saison ${ep.season} • Ép. ${ep.epInSeason}</p>
+                            </div>
+                            <span class="absolute top-2 right-2 ${badgeColor} text-[10px] px-2 py-0.5 rounded shadow uppercase tracking-wider">${ep.type}</span>
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-2 gap-2">
+                                    <h3 class="text-base font-bold text-white tracking-wider">Épisode ${ep.id}</h3>
+                                    <input type="checkbox" id="chk-${ep.id}" class="checkbox-custom flex-shrink-0" ${isWatched ? 'checked' : ''} onchange="toggleWatched(${ep.id}, this.checked)">
+                                </div>
+                            </div>
+                            <a href="${ep.betaUrl}" target="_blank" rel="noopener noreferrer" class="mt-4 block w-full text-center bg-gray-900 hover:bg-bleach-accent text-white py-2 rounded transition text-sm font-medium border border-gray-800 hover:border-bleach-accent">
+                                <i class="fa-solid fa-tv mr-2 text-gray-400 text-lg"></i> Voir sur BetaSeries
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.innerHTML = html;
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderEpisodes();
+        });
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-bleach-accent', 'text-white', 'shadow-lg', 'shadow-blue-950');
+                    b.classList.add('bg-bleach-gray', 'text-gray-300', 'border', 'border-gray-800');
+                });
+                btn.classList.remove('bg-bleach-gray', 'text-gray-300', 'border', 'border-gray-800');
+                btn.classList.add('bg-bleach-accent', 'text-white', 'shadow-lg', 'shadow-blue-950');
+                
+                currentFilter = btn.dataset.filter;
+                renderEpisodes();
+            });
+        });
+
+        exportBtn.addEventListener('click', () => {
+            const watchedIds = Object.keys(watched).map(Number);
+            if (watchedIds.length === 0) {
+                alert("Aucun épisode n'a été marqué comme vu pour l'instant !");
+                return;
+            }
+            const watchedData = watchedIds.map(id => episodes.find(e => e.id === id)).filter(Boolean);
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(watchedData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "bleach_episodes_vus.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (confirm("Êtes-vous sûr de vouloir réinitialiser toute votre progression ? Cette action est irréversible.")) {
+                watched = {};
+                saveState();
+                renderEpisodes();
+            }
+        });
+
+        updateProgress();
+        renderEpisodes();
+    </script>
+</body>
+</html>
