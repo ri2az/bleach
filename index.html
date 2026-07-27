@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bleach - Tracker d'Épisodes</title>
+    
+    <!-- Icône personnalisée pour l'écran d'accueil iOS (iPhone/iPad) -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -44,7 +48,7 @@
                 <h1 class="text-2xl font-black text-white uppercase tracking-wider">Bleach <span class="text-gray-400 font-light">Tracker</span></h1>
             </div>
             <div class="w-full md:w-1/3 relative">
-                <input type="text" id="searchInput" placeholder="Chercher par numéro (ex: 15)..." class="w-full bg-bleach-dark border border-gray-800 rounded-full py-2 px-4 pl-10 text-white focus:outline-none focus:border-bleach-accent focus:ring-1 focus:ring-bleach-accent transition">
+                <input type="text" id="searchInput" placeholder="Chercher par numéro ou titre..." class="w-full bg-bleach-dark border border-gray-800 rounded-full py-2 px-4 pl-10 text-white focus:outline-none focus:border-bleach-accent focus:ring-1 focus:ring-bleach-accent transition">
                 <i class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
             </div>
         </div>
@@ -126,6 +130,22 @@
             return { s: 16, e: epNum - 342 };
         }
 
+        const episodeTitles = [
+            "L'instant où je suis devenu un Shinigami", "Le travail d'un Shinigami", "Le souhait du grand frère, le souhait de la petite sœur", "Coup de foudre maudit", "Un combat à mort ! Ichigo vs Ichigo", "Fais exploser ! Rukia !", "Bouleversant ! Le cri de la petite rousse", "Détournement d'âme", "Infiltration ! Le piège d'Urahara", "L'agresseur ! Un combat de rue",
+            "Le légendaire Quincy !", "Un doux sourire", "La fleur et le hollow", "Combattre dos à dos !", "Le grand plan de Kon", "Rencontre, Abarai Renji !", "La mort d'Ichigo !", "Retrouve ton pouvoir !", "Ichigo devient un hollow !", "L'ombre de Gin",
+            "Entrée au Seireitei, les 14 divisions", "L'homme qui déteste les Shinigami", "La veille de l'exécution", "Seireitei en miettes ! Réveil", "Pénétrer la barrière !", "Fureur ! Les Shinigami se rassemblent", "Le piège de Chad", "Orihime visée", "Percer l'encerclement !", "Affrontement ! Renji vs Ichigo",
+            "La résolution de tuer", "Seconde collision ! Hitsugaya vs Ichigo", "Hinamori en larmes, le désespoir du Seireitei", "Renji vaincu ! Le combat à mort", "Connaissance et instinct", "La promesse de Kenpachi !", "Le mobile de l'assassin", "Le secret de Yachiru", "L'arme libérée mortelle", "Le combat des capitaines scellé",
+            "Catastrophe ! Révélation de la vérité", "La trahison commence", "Le grand rassemblement des capitaines !", "Rencontre fatidique : Aizen", "Libération de la puissance destructrice", "Sadistic Despair", "Chad rugit !", "Orihime, tu n'es pas seule", "Le secret de l'épée géante", "L'exécution s'approche",
+            "La fierté des Kuchiki", "L'heure du choix", "L'onde de choc du dragon noir", "Le secret révélé", "Le miracle de l'amour", "La justice des Shinigami", "Visage du désespoir", "La légende de la faucheuse", "Le retour d'Ichigo", "Victoire absolue !",
+            "Conclusion du plan d'Aizen", "Trafic d'âmes au Karakura", "Nouveau semestre, la terreur des Arrancar", "Le piège de la poupée", "Piège tendu aux environs", "Le piège se referme", "Tensa Zangetsu se réveille", "Terreurs nocturnes", "Le pouvoir de l'Hogyoku", "Le réveil des Visored",
+            "Le combat contre le vent", "Le réveil des 13 Divisions", "La première bataille", "Ulquiorra attaque", "Rencontre fatidique, Aizen et les Arrancar", "Hollowfication d'Ichigo", "Le secret du masque de Nel", "L'ultime résistance", "L'épreuve d'Urahara", "La force destructrice des Arrancar",
+            "Le plan de Rukia", "La rage de Chad", "Le pouvoir inattendu", "La décision de Rukia", "Le réveil de Toushirou", "L'arrivée des renforts", "Le combat décisif", "Le sacrifice de Grimmjow", "Le sergent-chef", "Le secret du masque",
+            "La vengeance de Kon", "La force cachée", "L'attaque de Mayuri", "La rédemption de Kira", "La stratégie de Kira", "La défaite de Szayelaporro", "Le combat de l'épée", "La résurrection de Nel", "La force de l'amour", "La colère de Yamamoto",
+            "Le sacrifice des capitaines", "La fin du combat", "La trahison révélée", "Le choix d'Aizen", "Le plan secret", "La force des capitaines", "Le combat de l'ombre", "La puissance des 13 divisions", "Le sacrifice ultime", "La fin du Hollow",
+            "La véritable force", "La fin d'une époque", "Le choix d'Ichigo", "Le combat final", "La fin de l'illusion", "Le pouvoir ultime", "Le dernier Getsuga Tensho !", "La fin du combat", "Le retour", "La fin de l'histoire",
+            ...Array.from({length: 366 - 130}, (_, i) => `Épisode ${131 + i}`)
+        ];
+
         const episodes = [];
         const totalEpisodes = 366;
         let totalMainStream = 0;
@@ -142,10 +162,11 @@
             const sStr = String(si.s).padStart(2, '0');
             const eStr = String(si.e).padStart(2, '0');
             const betaUrl = `https://www.betaseries.com/episode/bleachjp/s${sStr}e${eStr}`;
+            const title = episodeTitles[i - 1] || `Épisode ${i}`;
 
             episodes.push({
                 id: i,
-                title: `Épisode ${i}`,
+                title: title,
                 type: type,
                 category: cat,
                 season: si.s,
@@ -208,7 +229,7 @@
         function renderEpisodes() {
             const filtered = episodes.filter(ep => {
                 const matchFilter = currentFilter === 'all' || ep.category === currentFilter;
-                const matchSearch = ep.id.toString().includes(searchQuery) || ep.type.toLowerCase().includes(searchQuery);
+                const matchSearch = ep.id.toString().includes(searchQuery) || ep.title.toLowerCase().includes(searchQuery) || ep.type.toLowerCase().includes(searchQuery);
                 return matchFilter && matchSearch;
             });
 
@@ -220,7 +241,6 @@
             const html = filtered.map(ep => {
                 const isWatched = !!watched[ep.id];
                 
-                // Couleurs demandées : Canon = Vert, Hors-série = Rouge, Semi-filler = Jaune
                 let badgeColor = 'bg-green-600 text-white';
                 if (ep.category === 'filler') {
                     badgeColor = 'bg-red-600 text-white';
@@ -232,20 +252,19 @@
 
                 return `
                     <div id="card-${ep.id}" class="episode-card bg-[#161616] rounded-xl overflow-hidden border ${opacityClass} flex flex-col relative shadow-md">
-                        <div class="relative bg-gradient-to-tr from-black via-neutral-900 to-black h-36 flex items-center justify-center border-b border-gray-800/80 overflow-hidden">
-                            <img src="https://static.vecteezy.com/system/resources/previews/028/574/845/non_2x/bleach-anime-logo-free-vector.jpg" alt="Bleach Logo" class="absolute inset-0 w-full h-full object-contain p-4 opacity-25 filter drop-shadow">
-                            <div class="absolute inset-0 bg-black/50"></div>
-                            <div class="text-center z-10 px-2">
-                                <span class="text-white font-black text-3xl tracking-widest drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">#${ep.id}</span>
+                        <div class="relative bg-gradient-to-tr from-black via-neutral-900 to-black h-36 flex items-center justify-center border-b border-gray-800/80 overflow-hidden px-4">
+                            <div class="absolute inset-0 bg-black/60"></div>
+                            <div class="text-center z-10">
+                                <span class="text-white font-black text-2xl tracking-widest drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">#${ep.id}</span>
                                 <p class="text-[11px] text-gray-400 mt-1 uppercase tracking-wider font-semibold">Saison ${ep.season} • Ép. ${ep.epInSeason}</p>
                             </div>
                             <span class="absolute top-2 right-2 ${badgeColor} text-[10px] px-2 py-0.5 rounded shadow uppercase tracking-wider">${ep.type}</span>
                         </div>
                         <div class="p-4 flex-grow flex flex-col justify-between">
                             <div>
-                                <div class="flex justify-between items-center mb-2 gap-2">
-                                    <h3 class="text-base font-bold text-white tracking-wider">Épisode ${ep.id}</h3>
-                                    <input type="checkbox" id="chk-${ep.id}" class="checkbox-custom flex-shrink-0" ${isWatched ? 'checked' : ''} onchange="toggleWatched(${ep.id}, this.checked)">
+                                <div class="flex justify-between items-start mb-2 gap-2">
+                                    <h3 class="text-sm font-bold text-white leading-snug line-clamp-2">${ep.title}</h3>
+                                    <input type="checkbox" id="chk-${ep.id}" class="checkbox-custom flex-shrink-0 mt-0.5" ${isWatched ? 'checked' : ''} onchange="toggleWatched(${ep.id}, this.checked)">
                                 </div>
                             </div>
                             <a href="${ep.betaUrl}" target="_blank" rel="noopener noreferrer" class="mt-4 block w-full text-center bg-gray-900 hover:bg-bleach-accent text-white py-2 rounded transition text-sm font-medium border border-gray-800 hover:border-bleach-accent">
