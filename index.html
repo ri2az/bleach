@@ -25,18 +25,6 @@
         }
     </script>
     <style>
-        /* Importation de la police SilentBrush-Regular.otf */
-        @font-face {
-            font-family: 'SilentBrush';
-            src: url('SilentBrush-Regular.otf') format('opentype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        .font-silentbrush {
-            font-family: 'SilentBrush', system-ui, sans-serif;
-        }
-
         body { background-color: #09090b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; }
         .episode-card { transition: all 0.2s ease; }
         .episode-card:hover { transform: translateY(-3px); }
@@ -54,10 +42,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-wand-magic-sparkles text-bleach-accent text-xl"></i>
-                <!-- Titre avec la police SilentBrush -->
-                <h1 class="font-silentbrush text-3xl tracking-wider text-white">
-                    Bleach <span class="text-bleach-accent">Tracker</span>
-                </h1>
+                <h1 class="text-xl font-black uppercase tracking-wider text-white">Bleach <span class="text-bleach-accent">Tracker</span></h1>
                 <span class="text-[10px] bg-bleach-accent text-white font-bold px-2 py-0.5 rounded-full">366 Épisodes</span>
             </div>
             
@@ -246,6 +231,7 @@
             });
         }
 
+        // Progression sauvegardée initiale (84 premiers épisodes)
         const defaultWatched = {};
         for (let i = 1; i <= 84; i++) {
             defaultWatched[i] = true;
@@ -327,6 +313,7 @@
         }
 
         function updateProgress() {
+            // 1. Progression globale
             const watchedIds = Object.keys(watched).map(Number).filter(id => id <= TOTAL_CLASSIC);
             const watchedCount = watchedIds.length;
             const pctClassic = Math.round((watchedCount / TOTAL_CLASSIC) * 100) || 0;
@@ -334,6 +321,7 @@
             document.getElementById('classicProgressText').textContent = `${pctClassic}% (${watchedCount}/${TOTAL_CLASSIC})`;
             document.getElementById('classicProgressBar').style.width = `${pctClassic}%`;
 
+            // 2. Progression Histoire Principale (Canon + Semi-filler)
             const mainStoryEps = episodes.filter(e => e.category === 'canon' || e.category === 'semifiller');
             const watchedMainStoryCount = mainStoryEps.filter(e => watched[e.id]).length;
             const pctMainStory = Math.round((watchedMainStoryCount / mainStoryEps.length) * 100) || 0;
@@ -341,6 +329,7 @@
             document.getElementById('canonProgressText').textContent = `${pctMainStory}% (${watchedMainStoryCount}/${mainStoryEps.length})`;
             document.getElementById('canonProgressBar').style.width = `${pctMainStory}%`;
 
+            // Temps de visionnage
             const watchedHours = Math.floor((watchedCount * 22) / 60);
             const totalHours = Math.floor((TOTAL_CLASSIC * 22) / 60);
             
