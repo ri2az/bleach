@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bleach Tracker - 366 Épisodes</title>
+    <title>Bleach Tracker</title>
 
     <!-- CONFIGURATION ACCUEIL IPHONE (iOS) & WEB APP -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -67,11 +67,11 @@
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-wand-magic-sparkles text-bleach-accent text-xl"></i>
                 <h1 class="text-2xl font-silentbrush tracking-wider text-white">Bleach <span class="text-bleach-accent">Tracker</span></h1>
-                <span class="text-[10px] bg-bleach-accent text-white font-bold px-2 py-0.5 rounded-full">366 Épisodes</span>
+                <span id="totalEpBadge" class="text-[10px] bg-bleach-accent text-white font-bold px-2 py-0.5 rounded-full">... Épisodes</span>
             </div>
             
             <div class="w-full md:w-80 relative">
-                <input type="text" id="searchInput" placeholder="Rechercher (ex: 167, Ulquiorra)..." class="w-full bg-bleach-dark border border-bleach-border rounded-xl py-1.5 px-3 pl-9 text-xs text-white focus:outline-none focus:border-bleach-accent transition">
+                <input type="text" id="searchInput" placeholder="Rechercher (ex: 367, Yhwach, Ulquiorra)..." class="w-full bg-bleach-dark border border-bleach-border rounded-xl py-1.5 px-3 pl-9 text-xs text-white focus:outline-none focus:border-bleach-accent transition">
                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs"></i>
             </div>
         </div>
@@ -95,11 +95,11 @@
             <!-- Barre 1: Progression globale -->
             <div>
                 <div class="flex justify-between mb-1 text-xs font-semibold">
-                    <span class="text-zinc-300">Progression globale (1 à 366)</span>
-                    <span id="classicProgressText" class="text-white">23% (84/366)</span>
+                    <span id="globalProgressTitle" class="text-zinc-300">Progression globale</span>
+                    <span id="classicProgressText" class="text-white">0%</span>
                 </div>
                 <div class="w-full bg-bleach-dark rounded-full h-3 border border-bleach-border overflow-hidden">
-                    <div id="classicProgressBar" class="bg-bleach-accent h-full transition-all duration-300" style="width: 23%"></div>
+                    <div id="classicProgressBar" class="bg-bleach-accent h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -107,10 +107,10 @@
             <div>
                 <div class="flex justify-between mb-1 text-xs font-semibold">
                     <span class="text-zinc-300"><i class="fa-solid fa-fire text-emerald-400 mr-1.5"></i>Histoire Principale (Canon + Semi-filler)</span>
-                    <span id="canonProgressText" class="text-emerald-400">39%</span>
+                    <span id="canonProgressText" class="text-emerald-400">0%</span>
                 </div>
                 <div class="w-full bg-bleach-dark rounded-full h-2.5 border border-bleach-border overflow-hidden">
-                    <div id="canonProgressBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 39%"></div>
+                    <div id="canonProgressBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -203,7 +203,7 @@
 
     <script>
         const TMDB_API_KEY = "02a0fe7ad4f325897c61808483d554e0";
-        const BLEACH_CLASSIC_ID = 30984;
+        const BLEACH_ID = 30984; // ID unique TMDB Bleach
 
         const range = (s, e) => Array.from({length: e - s + 1}, (_, i) => s + i);
 
@@ -223,36 +223,54 @@
             { id: 13, name: "13. Rebellions des Zanpakuto (HS)", eps: range(230, 265), desc: "Les Zanpakuto prennent leur indépendance sous Muramasa." },
             { id: 14, name: "14. Arrancar: La Chute", eps: range(266, 316), desc: "Affrontement final contre Aizen et forme Mugetsu." },
             { id: 15, name: "15. Armée d'Invasion Gotei 13 (HS)", eps: range(317, 342), desc: "Des reigais (clones) prennent la place des capitaines." },
-            { id: 16, name: "16. Fullbringer", eps: range(343, 366), desc: "Ichigo cherche à retrouver ses pouvoirs grâce à Xcution." }
+            { id: 16, name: "16. Fullbringer", eps: range(343, 366), desc: "Ichigo cherche à retrouver ses pouvoirs grâce à Xcution." },
+            // ARCS BLEACH: THOUSAND-YEAR BLOOD WAR (TYBW)
+            { id: 17, name: "17. TYBW: Le Wandreich (Partie 1)", eps: range(367, 379), desc: "L'armée des Quincy emmenée par Yhwach attaque la Soul Society." },
+            { id: 18, name: "18. TYBW: La Séparation (Partie 2)", eps: range(380, 392), desc: "La Seconde Invasion du Seireitei et l'éveil de nouveaux pouvoirs." },
+            { id: 19, name: "19. TYBW: Le Conflit (Partie 3)", eps: range(393, 405), desc: "L'assaut du Palais Royal par le Wandenreich." },
+            { id: 20, name: "20. TYBW: La Calamité (Partie 4)", eps: range(406, 418), desc: "Bataille finale décisive de la guerre de Mille Ans." }
         ];
 
         const fillers = [33, 50, ...range(64, 108), ...range(128, 137), ...range(147, 149), ...range(168, 189), 204, 205, 213, 214, ...range(227, 265), 287, 298, 299, ...range(303, 305), ...range(311, 341), 355];
         const semiFillers = [8, 27, 32, 46, 109, 111, 116, 119, 141, 143, 146, 156, 160, 161, 190, 193, 206, 269, 342, 343];
 
-        const TOTAL_CLASSIC = 366;
-        const episodes = [];
+        let episodes = [];
+        let totalEpisodes = 366;
 
-        for (let i = 1; i <= TOTAL_CLASSIC; i++) {
-            let type = "Canon", cat = "canon";
+        function initEpisodes(tybwCount = 40) {
+            totalEpisodes = 366 + tybwCount;
+            episodes = [];
 
-            if (fillers.includes(i)) { type = "Hors-série"; cat = "filler"; }
-            else if (semiFillers.includes(i)) { type = "Semi-filler"; cat = "semifiller"; }
+            for (let i = 1; i <= totalEpisodes; i++) {
+                let type = "Canon", cat = "canon";
 
-            const arc = ARCS.find(a => a.eps.includes(i));
-            
-            episodes.push({
-                id: i,
-                title: `Épisode ${i}`,
-                type: type,
-                category: cat,
-                arcId: arc ? arc.id : 1,
-                arcName: arc ? arc.name : "",
-                betaUrl: `https://www.betaseries.com/episode/bleachjp/s01e${i}`,
-                stillPath: null,
-                overview: "Chargement du synopsis...",
-                voteAverage: "N/A",
-                airDate: "Inconnue"
-            });
+                if (fillers.includes(i)) { type = "Hors-série"; cat = "filler"; }
+                else if (semiFillers.includes(i)) { type = "Semi-filler"; cat = "semifiller"; }
+
+                const arc = ARCS.find(a => a.eps.includes(i));
+                
+                let betaUrl = `https://www.betaseries.com/episode/bleachjp/s01e${i}`;
+                if (i > 366) {
+                    const tybwEpNum = i - 366;
+                    betaUrl = `https://www.betaseries.com/episode/bleach-thousand-year-blood-war/s01e${tybwEpNum}`;
+                }
+
+                episodes.push({
+                    id: i,
+                    title: i > 366 ? `TYBW Épisode ${i - 366} (#${i})` : `Épisode ${i}`,
+                    type: type,
+                    category: cat,
+                    arcId: arc ? arc.id : (i > 366 ? 17 : 1),
+                    arcName: arc ? arc.name : "Guerre de Mille Ans",
+                    betaUrl: betaUrl,
+                    stillPath: null,
+                    overview: arc ? arc.desc : "Épisode canon de l'arc de la Guerre de Mille Ans.",
+                    voteAverage: "N/A",
+                    airDate: "Inconnue"
+                });
+            }
+
+            document.getElementById('totalEpBadge').textContent = `${totalEpisodes} Épisodes`;
         }
 
         const defaultWatched = {};
@@ -260,8 +278,9 @@
             defaultWatched[i] = true;
         }
 
-        let watched = JSON.parse(localStorage.getItem('bleachWatched')) || defaultWatched;
         let tmdbCache = JSON.parse(localStorage.getItem('bleachTmdbCache')) || {};
+
+        let watched = JSON.parse(localStorage.getItem('bleachWatched')) || defaultWatched;
         let currentTypeFilter = 'all';
         let currentArcFilter = 'all';
         let searchQuery = '';
@@ -285,15 +304,53 @@
             }
 
             try {
-                const resClassic = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_CLASSIC_ID}/season/1?api_key=${TMDB_API_KEY}&language=fr-FR`);
-
+                // 1. Saison 1 Bleach Classique
+                const resClassic = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}/season/1?api_key=${TMDB_API_KEY}&language=fr-FR`);
                 if (resClassic.ok) {
                     const data = await resClassic.json();
                     data.episodes?.forEach(e => cacheEpData(e.episode_number, e));
                 }
 
+                // 2. Saison 2 Bleach (TYBW en FR)
+                const resTybwFR = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}/season/2?api_key=${TMDB_API_KEY}&language=fr-FR`);
+                let tybwEpsFR = [];
+                if (resTybwFR.ok) {
+                    const dataFR = await resTybwFR.json();
+                    tybwEpsFR = dataFR.episodes || [];
+                }
+
+                // 3. Fallback EN pour récupérer synopsis/noms manquants en FR
+                const resTybwEN = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}/season/2?api_key=${TMDB_API_KEY}&language=en-US`);
+                let tybwEpsEN = [];
+                if (resTybwEN.ok) {
+                    const dataEN = await resTybwEN.json();
+                    tybwEpsEN = dataEN.episodes || [];
+                }
+
+                const totalTybw = Math.max(tybwEpsFR.length, tybwEpsEN.length, 39);
+                initEpisodes(totalTybw);
+
+                // Traitement et mise en cache
+                for (let idx = 0; idx < totalTybw; idx++) {
+                    const epFR = tybwEpsFR[idx];
+                    const epEN = tybwEpsEN[idx];
+                    const globalId = 366 + (idx + 1);
+
+                    if (epFR || epEN) {
+                        const mergedEp = {
+                            name: epFR?.name || epEN?.name || `TYBW Épisode ${idx + 1}`,
+                            still_path: epFR?.still_path || epEN?.still_path,
+                            overview: epFR?.overview || epEN?.overview || null,
+                            vote_average: epFR?.vote_average || epEN?.vote_average,
+                            air_date: epFR?.air_date || epEN?.air_date
+                        };
+                        cacheEpData(globalId, mergedEp);
+                    }
+                }
+
                 localStorage.setItem('bleachTmdbCache', JSON.stringify(tmdbCache));
                 applyCache();
+                updateProgress();
                 renderEpisodes();
             } catch (err) {
                 console.error("TMDB Fetch Error:", err);
@@ -301,10 +358,13 @@
         }
 
         function cacheEpData(globalId, tmdbEp) {
+            const arc = ARCS.find(a => a.eps.includes(globalId));
+            const fallbackDesc = arc ? arc.desc : "Épisode canon de l'arc de la Guerre de Mille Ans.";
+
             tmdbCache[globalId] = {
-                title: tmdbEp.name,
+                title: tmdbEp.name || `Épisode ${globalId}`,
                 stillPath: tmdbEp.still_path ? `https://image.tmdb.org/t/p/w780${tmdbEp.still_path}` : null,
-                overview: tmdbEp.overview || "Aucun synopsis disponible pour cet épisode.",
+                overview: (tmdbEp.overview && tmdbEp.overview.trim() !== "") ? tmdbEp.overview : fallbackDesc,
                 voteAverage: tmdbEp.vote_average ? tmdbEp.vote_average.toFixed(1) : "N/A",
                 airDate: tmdbEp.air_date ? new Date(tmdbEp.air_date).toLocaleDateString('fr-FR') : "Inconnue"
             };
@@ -336,11 +396,12 @@
         }
 
         function updateProgress() {
-            const watchedIds = Object.keys(watched).map(Number).filter(id => id <= TOTAL_CLASSIC);
+            const watchedIds = Object.keys(watched).map(Number).filter(id => id <= totalEpisodes);
             const watchedCount = watchedIds.length;
-            const pctClassic = Math.round((watchedCount / TOTAL_CLASSIC) * 100) || 0;
+            const pctClassic = Math.round((watchedCount / totalEpisodes) * 100) || 0;
 
-            document.getElementById('classicProgressText').textContent = `${pctClassic}% (${watchedCount}/${TOTAL_CLASSIC})`;
+            document.getElementById('globalProgressTitle').textContent = `Progression globale (1 à ${totalEpisodes})`;
+            document.getElementById('classicProgressText').textContent = `${pctClassic}% (${watchedCount}/${totalEpisodes})`;
             document.getElementById('classicProgressBar').style.width = `${pctClassic}%`;
 
             const mainStoryEps = episodes.filter(e => e.category === 'canon' || e.category === 'semifiller');
@@ -351,7 +412,7 @@
             document.getElementById('canonProgressBar').style.width = `${pctMainStory}%`;
 
             const watchedHours = Math.floor((watchedCount * 22) / 60);
-            const totalHours = Math.floor((TOTAL_CLASSIC * 22) / 60);
+            const totalHours = Math.floor((totalEpisodes * 22) / 60);
             
             document.getElementById('timeWatchedText').innerHTML = `<i class="fa-regular fa-clock text-bleach-accent mr-1"></i> Visionné : ${watchedHours}h`;
             document.getElementById('timeLeftText').innerHTML = `<i class="fa-solid fa-hourglass-half text-amber-500 mr-1"></i> Restant : ${totalHours - watchedHours}h`;
@@ -495,6 +556,7 @@
         };
 
         // Init
+        initEpisodes();
         updateProgress();
         renderEpisodes();
         fetchTMDB();
