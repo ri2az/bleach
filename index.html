@@ -49,7 +49,29 @@
             font-family: 'SilentBrush', system-ui, -apple-system, sans-serif;
         }
 
-        body { background-color: #09090b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; }
+        body { 
+            background-color: #09090b; 
+            color: #f4f4f5; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* FOND D'ÉCRAN APPLIQUÉ DYNAMIKEMENT VIA L'API */
+        #bg-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            filter: brightness(0.25) blur(3px);
+            transition: background-image 0.5s ease-in-out;
+        }
+
         .episode-card { transition: all 0.2s ease; }
         .episode-card:hover { transform: translateY(-3px); }
         .checkbox-custom { accent-color: #2563eb; width: 1.25rem; height: 1.25rem; cursor: pointer; }
@@ -61,8 +83,11 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
+    <!-- CONTENEUR DU FOND D'ÉCRAN DYNAMIQUE -->
+    <div id="bg-backdrop"></div>
+
     <!-- HEADER -->
-    <header class="bg-bleach-card border-b border-bleach-border sticky top-0 z-40 backdrop-blur-md bg-opacity-90">
+    <header class="bg-bleach-card/90 border-b border-bleach-border sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-wand-magic-sparkles text-bleach-accent text-xl"></i>
@@ -71,7 +96,7 @@
             </div>
             
             <div class="w-full md:w-80 relative">
-                <input type="text" id="searchInput" placeholder="Rechercher (ex: 367, Yhwach, Ulquiorra)..." class="w-full bg-bleach-dark border border-bleach-border rounded-xl py-1.5 px-3 pl-9 text-xs text-white focus:outline-none focus:border-bleach-accent transition">
+                <input type="text" id="searchInput" placeholder="Rechercher (ex: 367, Yhwach, Ulquiorra)..." class="w-full bg-bleach-dark/80 border border-bleach-border rounded-xl py-1.5 px-3 pl-9 text-xs text-white focus:outline-none focus:border-bleach-accent transition">
                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs"></i>
             </div>
         </div>
@@ -81,14 +106,14 @@
     <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
         
         <!-- PANNEAU DE PROGRESSION AVEC LES 2 BARRES -->
-        <section class="bg-bleach-card rounded-2xl p-5 mb-6 border border-bleach-border shadow-xl space-y-4">
+        <section class="bg-bleach-card/90 backdrop-blur-sm rounded-2xl p-5 mb-6 border border-bleach-border shadow-xl space-y-4">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-chart-line text-bleach-accent"></i> Suivi de Visionnage
                 </h2>
                 <div class="flex items-center gap-3 text-xs text-zinc-400">
-                    <span id="timeWatchedText" class="bg-bleach-dark px-3 py-1 rounded-lg border border-bleach-border"><i class="fa-regular fa-clock text-bleach-accent mr-1"></i> Visionné : 0h</span>
-                    <span id="timeLeftText" class="bg-bleach-dark px-3 py-1 rounded-lg border border-bleach-border"><i class="fa-solid fa-hourglass-half text-amber-500 mr-1"></i> Restant : 0h</span>
+                    <span id="timeWatchedText" class="bg-bleach-dark/80 px-3 py-1 rounded-lg border border-bleach-border"><i class="fa-regular fa-clock text-bleach-accent mr-1"></i> Visionné : 0h</span>
+                    <span id="timeLeftText" class="bg-bleach-dark/80 px-3 py-1 rounded-lg border border-bleach-border"><i class="fa-solid fa-hourglass-half text-amber-500 mr-1"></i> Restant : 0h</span>
                 </div>
             </div>
 
@@ -98,7 +123,7 @@
                     <span id="globalProgressTitle" class="text-zinc-300">Progression globale</span>
                     <span id="classicProgressText" class="text-white">0%</span>
                 </div>
-                <div class="w-full bg-bleach-dark rounded-full h-3 border border-bleach-border overflow-hidden">
+                <div class="w-full bg-bleach-dark/80 rounded-full h-3 border border-bleach-border overflow-hidden">
                     <div id="classicProgressBar" class="bg-bleach-accent h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
             </div>
@@ -109,7 +134,7 @@
                     <span class="text-zinc-300"><i class="fa-solid fa-fire text-emerald-400 mr-1.5"></i>Histoire Principale (Canon + Semi-filler)</span>
                     <span id="canonProgressText" class="text-emerald-400">0%</span>
                 </div>
-                <div class="w-full bg-bleach-dark rounded-full h-2.5 border border-bleach-border overflow-hidden">
+                <div class="w-full bg-bleach-dark/80 rounded-full h-2.5 border border-bleach-border overflow-hidden">
                     <div id="canonProgressBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
             </div>
@@ -117,10 +142,10 @@
             <!-- CONTROLES DATA -->
             <div class="mt-2 pt-3 border-t border-bleach-border/50 flex flex-wrap justify-between items-center gap-2 text-xs">
                 <div class="flex gap-2">
-                    <button id="exportBtn" class="bg-bleach-dark hover:bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-bleach-border transition flex items-center gap-1.5">
+                    <button id="exportBtn" class="bg-bleach-dark/80 hover:bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-bleach-border transition flex items-center gap-1.5">
                         <i class="fa-solid fa-download text-bleach-accent"></i> Exporter JSON
                     </button>
-                    <button id="importBtn" class="bg-bleach-dark hover:bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-bleach-border transition flex items-center gap-1.5">
+                    <button id="importBtn" class="bg-bleach-dark/80 hover:bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg border border-bleach-border transition flex items-center gap-1.5">
                         <i class="fa-solid fa-upload text-emerald-500"></i> Importer
                     </button>
                     <input type="file" id="importFile" class="hidden" accept=".json">
@@ -136,20 +161,20 @@
             <div class="flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex flex-wrap gap-1.5" id="typeFilters">
                     <button data-filter="all" class="type-filter-btn active px-3 py-1.5 rounded-lg bg-bleach-accent text-white font-semibold text-xs">Tous</button>
-                    <button data-filter="canon" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Canon uniquement</button>
-                    <button data-filter="filler" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Hors-Série (HS)</button>
-                    <button data-filter="unwatched" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Non vus</button>
+                    <button data-filter="canon" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card/90 text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Canon uniquement</button>
+                    <button data-filter="filler" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card/90 text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Hors-Série (HS)</button>
+                    <button data-filter="unwatched" class="type-filter-btn px-3 py-1.5 rounded-lg bg-bleach-card/90 text-zinc-400 font-medium border border-bleach-border hover:bg-zinc-800 transition text-xs">Non vus</button>
                 </div>
 
                 <div class="w-full sm:w-auto">
-                    <select id="arcSelect" class="w-full sm:w-72 bg-bleach-card border border-bleach-border rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-bleach-accent">
+                    <select id="arcSelect" class="w-full sm:w-72 bg-bleach-card/90 border border-bleach-border rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-bleach-accent">
                         <option value="all">Tous les Arcs Narratifs</option>
                     </select>
                 </div>
             </div>
 
             <!-- EN-TÊTE D'ARC SELECTIONNÉ -->
-            <div id="arcHeader" class="hidden bg-bleach-card p-4 rounded-xl border border-bleach-border flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div id="arcHeader" class="hidden bg-bleach-card/90 backdrop-blur-sm p-4 rounded-xl border border-bleach-border flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                     <h3 id="arcTitle" class="text-sm font-bold text-white"></h3>
                     <p id="arcDescription" class="text-xs text-zinc-400 mt-0.5 max-w-3xl"></p>
@@ -164,7 +189,7 @@
         <div id="episodesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
     </main>
 
-    <footer class="bg-bleach-card border-t border-bleach-border py-4 text-center text-xs text-zinc-500">
+    <footer class="bg-bleach-card/90 backdrop-blur-md border-t border-bleach-border py-4 text-center text-xs text-zinc-500">
         Bleach Tracker - Données TMDB & BetaSeries
     </footer>
 
@@ -203,7 +228,7 @@
 
     <script>
         const TMDB_API_KEY = "02a0fe7ad4f325897c61808483d554e0";
-        const BLEACH_ID = 30984; // ID unique TMDB Bleach
+        const BLEACH_ID = 30984; 
 
         const range = (s, e) => Array.from({length: e - s + 1}, (_, i) => s + i);
 
@@ -224,7 +249,6 @@
             { id: 14, name: "14. Arrancar: La Chute", eps: range(266, 316), desc: "Affrontement final contre Aizen et forme Mugetsu." },
             { id: 15, name: "15. Armée d'Invasion Gotei 13 (HS)", eps: range(317, 342), desc: "Des reigais (clones) prennent la place des capitaines." },
             { id: 16, name: "16. Fullbringer", eps: range(343, 366), desc: "Ichigo cherche à retrouver ses pouvoirs grâce à Xcution." },
-            // ARCS BLEACH: THOUSAND-YEAR BLOOD WAR (TYBW)
             { id: 17, name: "17. TYBW: Le Wandreich (Partie 1)", eps: range(367, 379), desc: "L'armée des Quincy emmenée par Yhwach attaque la Soul Society." },
             { id: 18, name: "18. TYBW: La Séparation (Partie 2)", eps: range(380, 392), desc: "La Seconde Invasion du Seireitei et l'éveil de nouveaux pouvoirs." },
             { id: 19, name: "19. TYBW: Le Conflit (Partie 3)", eps: range(393, 405), desc: "L'assaut du Palais Royal par le Wandenreich." },
@@ -279,7 +303,6 @@
         }
 
         let tmdbCache = JSON.parse(localStorage.getItem('bleachTmdbCache')) || {};
-
         let watched = JSON.parse(localStorage.getItem('bleachWatched')) || defaultWatched;
         let currentTypeFilter = 'all';
         let currentArcFilter = 'all';
@@ -304,6 +327,16 @@
             }
 
             try {
+                // Récupération de la fiche principale pour extraire le backdrop officiel
+                const resShow = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}?api_key=${TMDB_API_KEY}`);
+                if (resShow.ok) {
+                    const showData = await resShow.json();
+                    if (showData.backdrop_path) {
+                        const bgUrl = `https://image.tmdb.org/t/p/original${showData.backdrop_path}`;
+                        document.getElementById('bg-backdrop').style.backgroundImage = `url('${bgUrl}')`;
+                    }
+                }
+
                 // 1. Saison 1 Bleach Classique
                 const resClassic = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}/season/1?api_key=${TMDB_API_KEY}&language=fr-FR`);
                 if (resClassic.ok) {
@@ -319,7 +352,7 @@
                     tybwEpsFR = dataFR.episodes || [];
                 }
 
-                // 3. Fallback EN pour récupérer synopsis/noms manquants en FR
+                // 3. Fallback EN
                 const resTybwEN = await fetch(`https://api.themoviedb.org/3/tv/${BLEACH_ID}/season/2?api_key=${TMDB_API_KEY}&language=en-US`);
                 let tybwEpsEN = [];
                 if (resTybwEN.ok) {
@@ -330,7 +363,6 @@
                 const totalTybw = Math.max(tybwEpsFR.length, tybwEpsEN.length, 39);
                 initEpisodes(totalTybw);
 
-                // Traitement et mise en cache
                 for (let idx = 0; idx < totalTybw; idx++) {
                     const epFR = tybwEpsFR[idx];
                     const epEN = tybwEpsEN[idx];
@@ -443,7 +475,7 @@
                 const imageSrc = ep.stillPath || 'https://static.vecteezy.com/system/resources/previews/028/574/845/non_2x/bleach-anime-logo-free-vector.jpg';
 
                 return `
-                    <div id="card-${ep.id}" onclick="openEpisodeModal(${ep.id})" class="episode-card bg-bleach-card rounded-xl overflow-hidden border border-bleach-border ${isWatched ? 'opacity-40 grayscale' : ''} flex flex-col justify-between cursor-pointer">
+                    <div id="card-${ep.id}" onclick="openEpisodeModal(${ep.id})" class="episode-card bg-bleach-card/80 backdrop-blur-sm rounded-xl overflow-hidden border border-bleach-border ${isWatched ? 'opacity-40 grayscale' : ''} flex flex-col justify-between cursor-pointer">
                         <div>
                             <div class="relative h-28 bg-black overflow-hidden">
                                 <img src="${imageSrc}" alt="" class="w-full h-full object-cover opacity-60">
@@ -493,9 +525,9 @@
             btn.onclick = () => {
                 document.querySelectorAll('.type-filter-btn').forEach(b => {
                     b.classList.remove('bg-bleach-accent', 'text-white');
-                    b.classList.add('bg-bleach-card', 'text-zinc-400');
+                    b.classList.add('bg-bleach-card/90', 'text-zinc-400');
                 });
-                btn.classList.remove('bg-bleach-card', 'text-zinc-400');
+                btn.classList.remove('bg-bleach-card/90', 'text-zinc-400');
                 btn.classList.add('bg-bleach-accent', 'text-white');
                 currentTypeFilter = btn.dataset.filter;
                 renderEpisodes();
